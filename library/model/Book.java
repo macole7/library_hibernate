@@ -17,7 +17,7 @@ public class Book implements Serializable {
     @Column(name = "title")
     private String title;
 
-    @ManyToMany(mappedBy = "book")
+    @ManyToMany(mappedBy = "books")
     private Set<Author> authors = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

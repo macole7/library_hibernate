@@ -10,9 +10,7 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class PrefillDB {
 
@@ -25,53 +23,62 @@ public class PrefillDB {
     private static List<Book> books = Arrays.asList(new Book("Ogniem i Mieczem"), new Book("Quo vadis"), new Book("Krzyzacy"),
             new Book("Potop"), new Book("Harry Potter"), new Book("Effective Java"), new Book("Lalka"), new Book("Antek"));
 
+    private static List<Issue> issues = Arrays.asList(new Issue(1), new Issue(2), new Issue(3));
 
     public static void main(String[] args) {
-        Map<Author, List<Book>> namesOfBooks = createNamesOfBooks();
-        Map<Publisher, List<Integer>> issues = createIssue();
-        Map<Issue, List<Book>> dependenceBetweenBookAndIssue = createDependenceBetweenBookAndIssue();
-
         Transaction transaction = null;
         try (SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory()) {
             try (Session session = sessionFactory.openSession()) {
                 try {
                     transaction = session.beginTransaction();
-                    session.save(authors);
-                    session.save(publishers);
-                    session.save(books);
+                    authors.stream().forEach(session::save);
+                    publishers.stream().forEach(session::save);
+                    books.stream().forEach(session::save);
+                    issues.stream().forEach(session::save);
+                    addBooksToAuthor().stream().forEach(session::save);
+                    addPublisherToIssue().stream().forEach(session::save);
+                    addIssueToBook().stream().forEach(session::save);
                     transaction.commit();
 
                 } catch (RuntimeException e) {
                     if (transaction != null) {
                         transaction.rollback();
                     }
+                    e.getStackTrace();
                 }
             }
         }
     }
 
-    private static Map<Author, List<Book>> createNamesOfBooks() {
-        Map<Author, List<Book>> result = new HashMap<>();
-        result.put(authors.get(0), Arrays.asList(books.get(0), books.get(1), books.get(2), books.get(3)));
-        result.put(authors.get(1), Arrays.asList(books.get(4)));
-        result.put(authors.get(2), Arrays.asList(books.get(5)));
-        result.put(authors.get(3), Arrays.asList(books.get(6), books.get(7)));
-        return result;
+    private static List<Author> addBooksToAuthor() {
+        authors.get(0).getBooks().add(books.get(0));
+        authors.get(0).getBooks().add(books.get(1));
+        authors.get(0).getBooks().add(books.get(2));
+        authors.get(0).getBooks().add(books.get(3));
+        authors.get(1).getBooks().add(books.get(4));
+        authors.get(2).getBooks().add(books.get(5));
+        authors.get(3).getBooks().add(books.get(6));
+        authors.get(3).getBooks().add(books.get(7));
+        return authors;
     }
 
-    private static Map<Publisher, List<Integer>> createIssue() {
-        Map<Publisher, List<Integer>> issues = new HashMap<>();
-        issues.put(publishers.get(0), Arrays.asList(1, 2, 3));
-        issues.put(publishers.get(1), Arrays.asList(2, 3, 6));
-        issues.put(publishers.get(2), Arrays.asList(4, 6, 7));
-        return issues;
+    private static List<Book> addIssueToBook() {
+        books.get(0).setIssue(issues.get(0));
+        books.get(1).setIssue(issues.get(1));
+        books.get(2).setIssue(issues.get(2));
+        books.get(3).setIssue(issues.get(0));
+        books.get(4).setIssue(issues.get(1));
+        books.get(5).setIssue(issues.get(2));
+        books.get(6).setIssue(issues.get(0));
+        books.get(7).setIssue(issues.get(1));
+        return books;
+
     }
 
-    private static Map<Issue, List<Book>> createDependenceBetweenBookAndIssue() {
-        Map<Issue, List<Book>> issues = new HashMap<>();
-        issues.put(new Issue(1), Arrays.asList(books.get(0), books.get(5), books.get(3)));
-        issues.put(new Issue(2), Arrays.asList(books.get(1), books.get(2), books.get(3)));
-        issues.put(new Issue(3), Arrays.asList(books.get(0), books.get(7), books.get(4), books.get(6)));
+    private static List<Issue> addPublisherToIssue() {
+        issues.get(0).getPublishers().add(publishers.get(0));
+        issues.get(1).getPublishers().add(publishers.get(1));
+        issues.get(2).getPublishers().add(publishers.get(2));
         return issues;
     }
 }
