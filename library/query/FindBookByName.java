@@ -11,14 +11,14 @@ import java.util.List;
 
 public class FindBookByName {
     public static void main(String[] args) {
-        findByBookName("Ogniem i mieczem").stream().map(Book::getTitle).forEach(System.out::println);
+        findByBookName("Potop").stream().map(Book::getTitle).forEach(System.out::println);
     }
 
     public static List<Book> findByBookName(String name) {
         List<Book> booksByName = new ArrayList<>();
         try (SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory()) {
             try (Session session = sessionFactory.openSession()) {
-                Query q = session.createQuery("From Book where book_name = " + name);
+                Query q = session.createQuery("From Book"  + name);
                 booksByName = q.getResultList();
             }
         }

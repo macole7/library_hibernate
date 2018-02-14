@@ -36,7 +36,7 @@ public class PrefillDB {
                     books.stream().forEach(session::save);
                     issues.stream().forEach(session::save);
                     addBooksToAuthor().stream().forEach(session::save);
-                    addPublisherToIssue().stream().forEach(session::save);
+                    addIssueToPublisher().stream().forEach(session::save);
                     addIssueToBook().stream().forEach(session::save);
                     transaction.commit();
 
@@ -75,10 +75,10 @@ public class PrefillDB {
 
     }
 
-    private static List<Issue> addPublisherToIssue() {
-        issues.get(0).getPublishers().add(publishers.get(0));
-        issues.get(1).getPublishers().add(publishers.get(1));
-        issues.get(2).getPublishers().add(publishers.get(2));
-        return issues;
+   private static List<Publisher> addIssueToPublisher() {
+        publishers.get(0).setIssue(issues.get(0));
+        publishers.get(1).setIssue(issues.get(1));
+        publishers.get(2).setIssue(issues.get(2));
+        return publishers;
     }
 }
